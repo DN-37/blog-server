@@ -79,10 +79,38 @@ const UserController = {
     }
   },
   current: async (req, res) => {
-    res.send("current");
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.userId },
+      });
+
+      if (!user) {
+        return res.status(400).json({ error: "Не удалось найти пользователя" });
+      }
+
+      return res.status(200).json(user);
+    } catch (error) {
+      console.log("err", error);
+      res.status(500).json({ error: "Что-то пошло не так" });
+    }
   },
   getUserById: async (req, res) => {
-    res.send("getUserById");
+    const { id } = req.params;
+    const userId = req.user.userId;
+
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id },
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: "Пользователь не найден" });
+      }
+
+      res.json({ ...user });
+    } catch (error) {
+      res.status(500).json({ error: "Что-то пошло не так" });
+    }
   },
   updateUser: async (req, res) => {
     res.send("updateUser");

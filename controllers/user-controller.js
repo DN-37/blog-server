@@ -9,9 +9,14 @@ const UserController = {
   register: async (req, res) => {
     const { email, password, name } = req.body;
 
-    // Проверяем поля на существование
     if (!email || !password || !name) {
       return res.status(400).json({ error: "Все поля обязательны" });
+    }
+
+    if (password.length < 5) {
+      return res
+        .status(400)
+        .json({ error: "Пароль должен быть не менeе 5 символов" });
     }
 
     try {
@@ -52,6 +57,12 @@ const UserController = {
     // Проверяем поля на существование
     if (!email || !password) {
       return res.status(400).json({ error: "Все поля обязательны" });
+    }
+
+    if (password.length < 5) {
+      return res
+        .status(400)
+        .json({ error: "Пароль должен быть не менeе 5 символов" });
     }
 
     try {

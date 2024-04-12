@@ -27,26 +27,36 @@ const PostController = {
   },
 
   getAllPosts: async (req, res) => {
-    const userId = req.user.userId;
-
     try {
       const posts = await prisma.post.findMany({
         include: {
-          likes: true,
           author: true,
-          comments: true,
         },
         orderBy: {
           createdAt: "desc",
         },
       });
 
-      const postsWithLikeInfo = posts.map((post) => ({
-        ...post,
-        likedByUser: post.likes.some((like) => like.userId === userId),
-      }));
+      let count = parseInt(req.query.count);
+      if (!count) {
+        count = 2;
+      }
+      const pageCount = Math.ceil(posts.length / count);
+      let page = parseInt(req.query.page);
+      if (!page) {
+        page = 1;
+      }
+      if (page > pageCount) {
+        page = pageCount;
+      }
 
-      res.json(postsWithLikeInfo);
+      let postsWithPage = {
+        posts: [...posts].slice(page * count - count, page * count),
+        page: page,
+        pageCount: pageCount,
+      };
+
+      res.json(postsWithPage);
     } catch (err) {
       res.status(500).json({ error: "Произошла ошибка при получении постов" });
     }

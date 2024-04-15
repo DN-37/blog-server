@@ -61,6 +61,33 @@ const PostController = {
       res.status(500).json({ error: "Произошла ошибка при получении постов" });
     }
   },
+
+  deletePost: async (req, res) => {
+    const { id } = req.params;
+
+    // Проверка, что пользователь удаляет свой пост
+    const post = await prisma.post.findUnique({ where: { id } });
+
+    if (!post) {
+      return res.status(404).json({ error: "Пост не найден" });
+    }
+
+    if (post.authorId !== req.user.userId) {
+      return res
+        .status(403)
+        .json({ error: "Нет доступа к удалению чужого поста" });
+    }
+
+    try {
+      const transaction = await prisma.$transaction([
+        prisma.post.delete({ where: { id } }),
+      ]);
+
+      res.json(transaction);
+    } catch (error) {
+      res.status(500).json({ error: "Что-то пошло не так" });
+    }
+  },
 };
 
 module.exports = PostController;

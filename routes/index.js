@@ -26,5 +26,6 @@ router.put("/users/:id", authenticateToken, UserController.updateUser);
 router.post("/posts", authenticateToken, PostController.createPost);
 router.get("/posts", authenticateToken, PostController.getAllPosts);
 router.delete("/posts/:id", authenticateToken, PostController.deletePost);
+router.get("/posts/:id", authenticateToken, PostController.getPostById);
 
 module.exports = router;

@@ -28,7 +28,7 @@ const PostController = {
 
   getAllPosts: async (req, res) => {
     try {
-      const posts = await prisma.post.findMany({
+      let posts = await prisma.post.findMany({
         include: {
           author: true,
         },
@@ -36,6 +36,15 @@ const PostController = {
           createdAt: "desc",
         },
       });
+
+      let filter = req.query.filter;
+      const currentUser = req.user.userId;
+
+      if (filter === "my") {
+        posts = posts.filter((item) => item.authorId === currentUser);
+      } else if (filter === "enemy") {
+        posts = posts.filter((item) => item.authorId !== currentUser);
+      }
 
       let count = parseInt(req.query.count);
       if (!count) {
@@ -86,6 +95,32 @@ const PostController = {
       res.json(transaction);
     } catch (error) {
       res.status(500).json({ error: "Что-то пошло не так" });
+    }
+  },
+
+  getPostById: async (req, res) => {
+    const { id } = req.params;
+
+    try {
+      const post = await prisma.post.findUnique({
+        where: { id },
+        include: {
+          comments: {
+            include: {
+              user: true,
+            },
+          },
+          author: true,
+        }, // Include related posts
+      });
+
+      if (!post) {
+        return res.status(404).json({ error: "Пост не найден" });
+      }
+
+      res.json(post);
+    } catch (error) {
+      res.status(500).json({ error: "Произошла ошибка при получении поста" });
     }
   },
 };

@@ -51,6 +51,7 @@ const UserController = {
       res.status(500).json({ error: "Internal server error" });
     }
   },
+
   login: async (req, res) => {
     const { email, password } = req.body;
 
@@ -89,10 +90,23 @@ const UserController = {
       res.status(500).json({ error: "Internal server error" });
     }
   },
+
   current: async (req, res) => {
     try {
       const user = await prisma.user.findUnique({
         where: { id: req.user.userId },
+        include: {
+          followers: {
+            include: {
+              follower: true,
+            },
+          },
+          following: {
+            include: {
+              following: true,
+            },
+          },
+        },
       });
 
       if (!user) {
@@ -105,6 +119,7 @@ const UserController = {
       res.status(500).json({ error: "Что-то пошло не так" });
     }
   },
+
   getUserById: async (req, res) => {
     const { id } = req.params;
     const userId = req.user.userId;
@@ -112,17 +127,29 @@ const UserController = {
     try {
       const user = await prisma.user.findUnique({
         where: { id },
+        include: {
+          followers: true,
+          following: true,
+        },
       });
 
       if (!user) {
         return res.status(404).json({ error: "Пользователь не найден" });
       }
 
-      res.json({ ...user });
+      // Проверяем, подписан ли текущий пользователь на пользователя
+      const isFollowing = await prisma.follows.findFirst({
+        where: {
+          AND: [{ followerId: userId }, { followingId: id }],
+        },
+      });
+
+      res.json({ ...user, isFollowing: Boolean(isFollowing) });
     } catch (error) {
       res.status(500).json({ error: "Что-то пошло не так" });
     }
   },
+
   updateUser: async (req, res) => {
     const { id } = req.params;
     const { email, name, dateOfBirth, bio, location } = req.body;

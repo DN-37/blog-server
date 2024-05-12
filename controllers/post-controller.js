@@ -31,6 +31,7 @@ const PostController = {
       let posts = await prisma.post.findMany({
         include: {
           author: true,
+          comments: true,
         },
         orderBy: {
           createdAt: "desc",
@@ -90,6 +91,7 @@ const PostController = {
     try {
       const transaction = await prisma.$transaction([
         prisma.post.delete({ where: { id } }),
+        prisma.comment.deleteMany({ where: { postId: id } }),
       ]);
 
       res.json(transaction);

@@ -43,5 +43,10 @@ router.delete(
 );
 
 router.post("/comments", authenticateToken, CommentController.createComment);
+router.delete(
+  "/comments/:id",
+  authenticateToken,
+  CommentController.deleteComment
+);
 
 module.exports = router;

@@ -5,6 +5,7 @@ const UserController = require("../controllers/user-controller");
 const PostController = require("../controllers/post-controller");
 const FollowController = require("../controllers/follow-controller");
 const CommentController = require("../controllers/comment-controller");
+const LikeController = require("../controllers/like-controller");
 const { authenticateToken } = require("../middleware/auth");
 
 const uploadDestination = "uploads";
@@ -48,5 +49,7 @@ router.delete(
   authenticateToken,
   CommentController.deleteComment
 );
+
+router.post("/likes", authenticateToken, LikeController.likePost);
 
 module.exports = router;

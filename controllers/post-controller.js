@@ -32,6 +32,7 @@ const PostController = {
         include: {
           author: true,
           comments: true,
+          likes: true,
         },
         orderBy: {
           createdAt: "desc",
@@ -60,8 +61,13 @@ const PostController = {
         page = pageCount;
       }
 
+      const postsWithLikeInfo = posts.map((post) => ({
+        ...post,
+        likedByUser: post.likes.some((like) => like.userId === currentUser),
+      }));
+
       let postsWithPage = {
-        posts: [...posts].slice(page * count - count, page * count),
+        posts: [...postsWithLikeInfo].slice(page * count - count, page * count),
         page: page,
         pageCount: pageCount,
       };
@@ -92,6 +98,7 @@ const PostController = {
       const transaction = await prisma.$transaction([
         prisma.post.delete({ where: { id } }),
         prisma.comment.deleteMany({ where: { postId: id } }),
+        prisma.like.deleteMany({ where: { postId: id } }),
       ]);
 
       res.json(transaction);
@@ -102,6 +109,7 @@ const PostController = {
 
   getPostById: async (req, res) => {
     const { id } = req.params;
+    const currentUser = req.user.userId;
 
     try {
       const post = await prisma.post.findUnique({
@@ -113,6 +121,7 @@ const PostController = {
             },
           },
           author: true,
+          likes: true,
         }, // Include related posts
       });
 
@@ -120,7 +129,12 @@ const PostController = {
         return res.status(404).json({ error: "Пост не найден" });
       }
 
-      res.json(post);
+      const postWithLikeInfo = {
+        ...post,
+        likedByUser: post.likes.some((like) => like.userId === currentUser),
+      };
+
+      res.json(postWithLikeInfo);
     } catch (error) {
       res.status(500).json({ error: "Произошла ошибка при получении поста" });
     }

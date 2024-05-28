@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 
 const authenticateToken = (req, res, next) => {
-  // Полчуить токен из заголовка Authorization
+  // Получить токен из заголовка Authorization
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 

@@ -7,7 +7,9 @@ const PostController = {
     const authorId = req.user.userId;
 
     if (!content) {
-      return res.status(400).json({ error: "Все поля обязательны" });
+      return res
+        .status(400)
+        .json({ error: "Все поля обязательны для заполнения" });
     }
 
     try {

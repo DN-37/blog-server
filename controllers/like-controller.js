@@ -7,7 +7,9 @@ const LikeController = {
     const userId = req.user.userId;
 
     if (!postId) {
-      return res.status(400).json({ error: "Все поля обязательны" });
+      return res
+        .status(400)
+        .json({ error: "Все поля обязательны для заполнения" });
     }
 
     try {

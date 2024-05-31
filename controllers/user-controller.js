@@ -10,17 +10,19 @@ const UserController = {
     const { email, password, name } = req.body;
 
     if (!email || !password || !name) {
-      return res.status(400).json({ error: "Все поля обязательны" });
+      return res
+        .status(400)
+        .json({ error: "Все поля обязательны для заполнения" });
     }
 
     if (password.length < 5) {
       return res
         .status(400)
-        .json({ error: "Пароль должен быть не менeе 5 символов" });
+        .json({ error: "Пароль должен содержать не менее 5 символов" });
     }
 
     try {
-      // Проверяем, существует ли пользователь с таким emai
+      // Проверяем, существует ли пользователь с таким email
       const existingUser = await prisma.user.findUnique({ where: { email } });
       if (existingUser) {
         return res.status(400).json({ error: "Пользователь уже существует" });
@@ -57,13 +59,15 @@ const UserController = {
 
     // Проверяем поля на существование
     if (!email || !password) {
-      return res.status(400).json({ error: "Все поля обязательны" });
+      return res
+        .status(400)
+        .json({ error: "Все поля обязательны для заполнения" });
     }
 
     if (password.length < 5) {
       return res
         .status(400)
-        .json({ error: "Пароль должен быть не менeе 5 символов" });
+        .json({ error: "Пароль должен содержать не менее 5 символов" });
     }
 
     try {
